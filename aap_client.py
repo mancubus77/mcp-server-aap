@@ -9,6 +9,8 @@ from typing import Dict, List, Optional, Any
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import asyncio
+import json
+import yaml
 
 load_dotenv()
 
@@ -144,6 +146,12 @@ class AAPClient:
             # Handle empty string extra_vars from API
             if "extra_vars" in template_data and template_data["extra_vars"] == "":
                 template_data["extra_vars"] = None
+            if "extra_vars" in template_data and isinstance(template_data["extra_vars"], str):
+                try:
+                    template_data["extra_vars"] = json.loads(template_data["extra_vars"])
+                except json.JSONDecodeError:
+                    # Try it as yaml
+                    template_data["extra_vars"] = yaml.safe_load(template_data["extra_vars"])
             templates.append(JobTemplate(**template_data))
         
         return templates
